@@ -38,21 +38,22 @@ import cloud.orbit.actors.Stage;
 import cloud.orbit.actors.extensions.ActorExtension;
 import cloud.orbit.actors.runtime.Messaging;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableConfigurationProperties(OrbitActorsProperties.class)
 public class OrbitSpringConfiguration {
-    @Autowired
-    AutowireCapableBeanFactory factory;
-
     @Autowired(required = false)
     List<OrbitSpringConfigurationAddon> configAddons;
+    
+    @Bean
+    public ActorExtension springLifecycleExtension(AutowireCapableBeanFactory factory) {
+      return new SpringLifetimeExtension(factory);
+    }
 
     @Bean
-    public Stage stage(OrbitActorsProperties properties) {
+    public Stage stage(OrbitActorsProperties properties, List<ActorExtension> actorExtensions) {
         Stage.Builder stageBuilder = new Stage.Builder();
 
         if (properties.getBasePackages() != null) {
@@ -72,10 +73,6 @@ public class OrbitSpringConfiguration {
             stageBuilder.mode(properties.getStageMode());
         }
 
-        List<ActorExtension> actorExtensions = Arrays.asList(new SpringLifetimeExtension(factory));
-        if (properties.getExtensions() != null) {
-            actorExtensions.addAll(properties.getExtensions());
-        }
         stageBuilder.extensions(actorExtensions.toArray(new ActorExtension[actorExtensions.size()]));
 
         if (properties.getTimeToLiveInSeconds() != null) {

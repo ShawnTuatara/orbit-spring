@@ -50,7 +50,7 @@ class SpringLifetimeExtension implements LifetimeExtension {
 
     // Provides property injection for actors
     @Override
-    public Task preActivation(AbstractActor actor) {
+    public Task<Void> preActivation(AbstractActor<?> actor) {
         beanFactory.autowireBeanProperties(actor, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE ,false);
         return Task.done();
     }
